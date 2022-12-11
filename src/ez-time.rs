@@ -22,7 +22,9 @@ impl EzTime for cosmwasm_std::Timestamp {
     fn eztime_struct(&self) -> StdResult<EzTimeStruct> {
         let seconds = &self.seconds();
         let nano = &self.subsec_nanos();
-        let dt = NaiveDateTime::from_timestamp(*seconds as i64, *nano as u32);
+        let Some(dt) = NaiveDateTime::from_timestamp_opt(*seconds as i64, *nano as u32) else {
+            return Err(StdError::GenericErr { msg: "Invalid Timestamp".to_string() });
+        };
         Ok(EzTimeStruct {
             year: dt.year() as u32,
             month: dt.month(),
@@ -36,7 +38,9 @@ impl EzTime for cosmwasm_std::Timestamp {
     fn eztime_string(&self) -> StdResult<String> {
         let seconds = &self.seconds();
         let nano = &self.subsec_nanos();
-        let dt = NaiveDateTime::from_timestamp(*seconds as i64, *nano as u32);
+        let Some(dt) = NaiveDateTime::from_timestamp_opt(*seconds as i64, *nano as u32) else {
+            return Err(StdError::GenericErr { msg: "Invalid Timestamp".to_string() });
+        };
         match dt.month() {
             1 => {
                 return Ok(format!(
